@@ -1,0 +1,2 @@
+event.name=pet.lexicon
+pet.lexicon=event.name

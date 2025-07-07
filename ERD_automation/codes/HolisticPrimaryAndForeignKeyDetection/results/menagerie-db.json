@@ -1,0 +1,89 @@
+{
+  "metadata": {
+    "csv_directory": "/home/haseeb/Desktop/EKAI/ERD_automation/Dataset/train/menagerie-db",
+    "tables_processed": 2,
+    "total_uccs": 6,
+    "total_inds": 2,
+    "primary_keys_detected": 2,
+    "foreign_keys_detected": 1
+  },
+  "table_info": {
+    "event": {
+      "file_path": "/home/haseeb/Desktop/EKAI/ERD_automation/Dataset/train/menagerie-db/event.csv",
+      "rows": 10,
+      "columns": 4,
+      "column_names": [
+        "name",
+        "date",
+        "type",
+        "remark"
+      ]
+    },
+    "pet": {
+      "file_path": "/home/haseeb/Desktop/EKAI/ERD_automation/Dataset/train/menagerie-db/pet.csv",
+      "rows": 8,
+      "columns": 6,
+      "column_names": [
+        "lexicon",
+        "owner",
+        "species",
+        "sex",
+        "birth",
+        "death"
+      ]
+    }
+  },
+  "primary_keys": {
+    "event": [
+      "remark"
+    ],
+    "pet": [
+      "lexicon"
+    ]
+  },
+  "foreign_keys": {
+    "event": [
+      {
+        "columns": [
+          "name"
+        ],
+        "references": {
+          "table": "pet",
+          "columns": [
+            "lexicon"
+          ]
+        },
+        "score": 0.85
+      }
+    ]
+  },
+  "unique_column_combinations": {
+    "event": [
+      [
+        "remark"
+      ],
+      [
+        "name",
+        "date"
+      ]
+    ],
+    "pet": [
+      [
+        "lexicon"
+      ],
+      [
+        "birth"
+      ],
+      [
+        "owner",
+        "species",
+        "sex"
+      ],
+      [
+        "species",
+        "sex",
+        "death"
+      ]
+    ]
+  }
+}
