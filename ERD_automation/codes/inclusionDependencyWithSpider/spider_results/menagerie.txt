@@ -1,2 +1,2 @@
-event.name=pet.lexicon
 pet.lexicon=event.name
+event.name=pet.lexicon
