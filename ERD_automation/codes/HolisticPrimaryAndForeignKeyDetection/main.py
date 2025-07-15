@@ -4,6 +4,16 @@ from attribute import Attribute
 from ind import IND
 import logging
 
+logging.basicConfig(
+                    filename=os.path.join(os.getcwd(),"app.log"),
+                    encoding="utf-8",
+                    filemode="w",
+                    format="{asctime} - {levelname} - {message}",
+                    style="{",
+                    datefmt="%Y-%m-%d %H:%M",
+                    level=10
+)
+
 def load_csv_files(directory_path):
     """
     Load CSV files from a directory and create Attribute objects.
@@ -26,14 +36,14 @@ def load_csv_files(directory_path):
 
     csv_files = [f for f in os.listdir(directory_path)]
 
-    print(f"Found {len(csv_files)} \n CSV files: {csv_files}")    
+    logging.info(f"Found {len(csv_files)} \n CSV files: {csv_files}")
 
     for filename in csv_files:
         file_path = os.path.join(directory_path, filename)
         table_name = os.path.splitext(filename)[0]
 
         df = pd.read_csv(file_path)
-        print(f"Processing {filename}: {df.shape[0]} rows, {df.shape[1]} columns")
+        logging.info(f"Processing {filename}: {df.shape[0]} rows, {df.shape[1]} columns")
 
         for i, column in enumerate(df.columns):
             non_null_values = df[column].astype(str).dropna().tolist()
@@ -41,8 +51,9 @@ def load_csv_files(directory_path):
                 attr = Attribute(table_name, column, non_null_values)
                 attr.position = 1/(i+1)
                 attributes[f"{table_name}.{column}"] = attr
-                print(f"Added attribute: {attr.table_name}.{attr.attribute_name} Total Values: {len(attr.values)}")
+                logging.info(f"Added attribute: {attr.table_name}.{attr.attribute_name} Total Values: {len(attr.values)}")
                 
+    logging.info("------------------------------------------------------")
     return attributes
 
 def extractPrimaryKeys(attributes):
@@ -59,13 +70,17 @@ def extractPrimaryKeys(attributes):
     dict
         Dictionary mapping table names to tuples of (column name, pkScore)
     """
-    pk_table = {}  # {table name: (column name, score)}
+    pk_table = {}  # {table name: (tableName.AttributeName, score)}
 
     for key, value in attributes.items():
         table_name = key.split(".")[0]
         current_pk = pk_table.get(table_name)
         if not current_pk or current_pk[1] < value.pkScore:
             pk_table[table_name] = (value.fullName, value.pkScore)
+    logging.info("--------------------------Tables and their Primary Keys----------------------------")
+    for key, value in pk_table.items():
+        logging.info(f"{key} : {value[0]}")
+    logging.info("------------------------------------------------------")
     return pk_table
 
 def read_IND(file_path, attributes):
@@ -91,6 +106,7 @@ def read_IND(file_path, attributes):
         for line in f:
             vars = line.strip().split("=")
             inds.append(IND(attributes[vars[0]], attributes[vars[1]]))
+    logging.info(f"Number of INDs from spider: {len(inds)}")
     return inds
 
 def prefiltering(inds, pk_table):
@@ -134,6 +150,7 @@ def prefiltering(inds, pk_table):
         
         if is_pk and (not reference_all_null) and (not dependent_all_null):
             pruned_inds.append(ind)
+    logging.info(f"Number of INDs after prefiltering: {len(pruned_inds)}")
 
     return pruned_inds
 
@@ -142,5 +159,7 @@ def main():
     pk_table = extractPrimaryKeys(attributes=attributes)   
     inds = read_IND("/home/haseeb/Desktop/EKAI/ERD_automation/codes/inclusionDependencyWithSpider/spider_results/northwind.txt", attributes=attributes)
     prefiltered_inds = prefiltering(inds=inds, pk_table=pk_table)
-         
+
+if __name__ == "__main__":
+    main()
             

@@ -1,0 +1,111 @@
+2025-07-15 17:56 - INFO - Found 11 
+ CSV files: ['employee_territories.csv', 'products.csv', 'orders.csv', 'customers.csv', 'territories.csv', 'orders_details.csv', 'suppliers.csv', 'employees.csv', 'categories.csv', 'shippers.csv', 'regions.csv']
+2025-07-15 17:56 - INFO - Processing employee_territories.csv: 49 rows, 2 columns
+2025-07-15 17:56 - INFO - Added attribute: employee_territories.employeeid Total Values: 49
+2025-07-15 17:56 - INFO - Added attribute: employee_territories.territoryid Total Values: 49
+2025-07-15 17:56 - INFO - Processing products.csv: 77 rows, 10 columns
+2025-07-15 17:56 - INFO - Added attribute: products.productid Total Values: 77
+2025-07-15 17:56 - INFO - Added attribute: products.productname Total Values: 77
+2025-07-15 17:56 - INFO - Added attribute: products.supplierid Total Values: 77
+2025-07-15 17:56 - INFO - Added attribute: products.categoryid Total Values: 77
+2025-07-15 17:56 - INFO - Added attribute: products.quantityperunit Total Values: 77
+2025-07-15 17:56 - INFO - Added attribute: products.unitprice Total Values: 77
+2025-07-15 17:56 - INFO - Added attribute: products.unitsinstock Total Values: 77
+2025-07-15 17:56 - INFO - Added attribute: products.unitsonorder Total Values: 77
+2025-07-15 17:56 - INFO - Added attribute: products.reorderlevel Total Values: 77
+2025-07-15 17:56 - INFO - Added attribute: products.discontinued Total Values: 77
+2025-07-15 17:56 - INFO - Processing orders.csv: 830 rows, 13 columns
+2025-07-15 17:56 - INFO - Added attribute: orders.orderid Total Values: 830
+2025-07-15 17:56 - INFO - Added attribute: orders.customerid Total Values: 830
+2025-07-15 17:56 - INFO - Added attribute: orders.employeeid Total Values: 830
+2025-07-15 17:56 - INFO - Added attribute: orders.orderdate Total Values: 830
+2025-07-15 17:56 - INFO - Added attribute: orders.requireddate Total Values: 830
+2025-07-15 17:56 - INFO - Added attribute: orders.shippeddate Total Values: 830
+2025-07-15 17:56 - INFO - Added attribute: orders.shipvia Total Values: 830
+2025-07-15 17:56 - INFO - Added attribute: orders.freight Total Values: 830
+2025-07-15 17:56 - INFO - Added attribute: orders.shipname Total Values: 830
+2025-07-15 17:56 - INFO - Added attribute: orders.shipcity Total Values: 830
+2025-07-15 17:56 - INFO - Added attribute: orders.shipregion Total Values: 830
+2025-07-15 17:56 - INFO - Added attribute: orders.shippostalcode Total Values: 830
+2025-07-15 17:56 - INFO - Added attribute: orders.shipcountry Total Values: 830
+2025-07-15 17:56 - INFO - Processing customers.csv: 91 rows, 10 columns
+2025-07-15 17:56 - INFO - Added attribute: customers.customerid Total Values: 91
+2025-07-15 17:56 - INFO - Added attribute: customers.companyname Total Values: 91
+2025-07-15 17:56 - INFO - Added attribute: customers.contactname Total Values: 91
+2025-07-15 17:56 - INFO - Added attribute: customers.contacttitle Total Values: 91
+2025-07-15 17:56 - INFO - Added attribute: customers.city Total Values: 91
+2025-07-15 17:56 - INFO - Added attribute: customers.region Total Values: 91
+2025-07-15 17:56 - INFO - Added attribute: customers.postalcode Total Values: 91
+2025-07-15 17:56 - INFO - Added attribute: customers.country Total Values: 91
+2025-07-15 17:56 - INFO - Added attribute: customers.phone Total Values: 91
+2025-07-15 17:56 - INFO - Added attribute: customers.fax Total Values: 91
+2025-07-15 17:56 - INFO - Processing territories.csv: 53 rows, 3 columns
+2025-07-15 17:56 - INFO - Added attribute: territories.territoryid Total Values: 53
+2025-07-15 17:56 - INFO - Added attribute: territories.territorydescription Total Values: 53
+2025-07-15 17:56 - INFO - Added attribute: territories.regionid Total Values: 53
+2025-07-15 17:56 - INFO - Processing orders_details.csv: 2155 rows, 5 columns
+2025-07-15 17:56 - INFO - Added attribute: orders_details.orderid Total Values: 2155
+2025-07-15 17:56 - INFO - Added attribute: orders_details.productid Total Values: 2155
+2025-07-15 17:56 - INFO - Added attribute: orders_details.unitprice Total Values: 2155
+2025-07-15 17:56 - INFO - Added attribute: orders_details.quantity Total Values: 2155
+2025-07-15 17:56 - INFO - Added attribute: orders_details.discount Total Values: 2155
+2025-07-15 17:56 - INFO - Processing suppliers.csv: 29 rows, 12 columns
+2025-07-15 17:56 - INFO - Added attribute: suppliers.supplierid Total Values: 29
+2025-07-15 17:56 - INFO - Added attribute: suppliers.companyname Total Values: 29
+2025-07-15 17:56 - INFO - Added attribute: suppliers.contactname Total Values: 29
+2025-07-15 17:56 - INFO - Added attribute: suppliers.contacttitle Total Values: 29
+2025-07-15 17:56 - INFO - Added attribute: suppliers.address Total Values: 29
+2025-07-15 17:56 - INFO - Added attribute: suppliers.city Total Values: 29
+2025-07-15 17:56 - INFO - Added attribute: suppliers.region Total Values: 29
+2025-07-15 17:56 - INFO - Added attribute: suppliers.postalcode Total Values: 29
+2025-07-15 17:56 - INFO - Added attribute: suppliers.country Total Values: 29
+2025-07-15 17:56 - INFO - Added attribute: suppliers.phone Total Values: 29
+2025-07-15 17:56 - INFO - Added attribute: suppliers.fax Total Values: 29
+2025-07-15 17:56 - INFO - Added attribute: suppliers.homepage Total Values: 29
+2025-07-15 17:56 - INFO - Processing employees.csv: 9 rows, 18 columns
+2025-07-15 17:56 - INFO - Added attribute: employees.employeeid Total Values: 9
+2025-07-15 17:56 - INFO - Added attribute: employees.lastname Total Values: 9
+2025-07-15 17:56 - INFO - Added attribute: employees.firstname Total Values: 9
+2025-07-15 17:56 - INFO - Added attribute: employees.title Total Values: 9
+2025-07-15 17:56 - INFO - Added attribute: employees.titleofcourtesy Total Values: 9
+2025-07-15 17:56 - INFO - Added attribute: employees.birthdate Total Values: 9
+2025-07-15 17:56 - INFO - Added attribute: employees.hiredate Total Values: 9
+2025-07-15 17:56 - INFO - Added attribute: employees.address Total Values: 9
+2025-07-15 17:56 - INFO - Added attribute: employees.city Total Values: 9
+2025-07-15 17:56 - INFO - Added attribute: employees.region Total Values: 9
+2025-07-15 17:56 - INFO - Added attribute: employees.postalcode Total Values: 9
+2025-07-15 17:56 - INFO - Added attribute: employees.country Total Values: 9
+2025-07-15 17:56 - INFO - Added attribute: employees.homephone Total Values: 9
+2025-07-15 17:56 - INFO - Added attribute: employees.extension Total Values: 9
+2025-07-15 17:56 - INFO - Added attribute: employees.photo Total Values: 9
+2025-07-15 17:56 - INFO - Added attribute: employees.notes Total Values: 9
+2025-07-15 17:56 - INFO - Added attribute: employees.reportsto Total Values: 9
+2025-07-15 17:56 - INFO - Added attribute: employees.photopath Total Values: 9
+2025-07-15 17:56 - INFO - Processing categories.csv: 8 rows, 4 columns
+2025-07-15 17:56 - INFO - Added attribute: categories.categoryid Total Values: 8
+2025-07-15 17:56 - INFO - Added attribute: categories.categoryname Total Values: 8
+2025-07-15 17:56 - INFO - Added attribute: categories.description Total Values: 8
+2025-07-15 17:56 - INFO - Added attribute: categories.picture Total Values: 8
+2025-07-15 17:56 - INFO - Processing shippers.csv: 6 rows, 3 columns
+2025-07-15 17:56 - INFO - Added attribute: shippers.shipperid Total Values: 6
+2025-07-15 17:56 - INFO - Added attribute: shippers.companyname Total Values: 6
+2025-07-15 17:56 - INFO - Added attribute: shippers.phone Total Values: 6
+2025-07-15 17:56 - INFO - Processing regions.csv: 4 rows, 2 columns
+2025-07-15 17:56 - INFO - Added attribute: regions.regionid Total Values: 4
+2025-07-15 17:56 - INFO - Added attribute: regions.regiondescription Total Values: 4
+2025-07-15 17:56 - INFO - ------------------------------------------------------
+2025-07-15 17:56 - INFO - --------------------------Tables and their Primary Keys----------------------------
+2025-07-15 17:56 - INFO - employee_territories : employee_territories.territoryid
+2025-07-15 17:56 - INFO - products : products.productid
+2025-07-15 17:56 - INFO - orders : orders.orderid
+2025-07-15 17:56 - INFO - customers : customers.customerid
+2025-07-15 17:56 - INFO - territories : territories.territoryid
+2025-07-15 17:56 - INFO - orders_details : orders_details.orderid
+2025-07-15 17:56 - INFO - suppliers : suppliers.supplierid
+2025-07-15 17:56 - INFO - employees : employees.employeeid
+2025-07-15 17:56 - INFO - categories : categories.categoryid
+2025-07-15 17:56 - INFO - shippers : shippers.shipperid
+2025-07-15 17:56 - INFO - regions : regions.regionid
+2025-07-15 17:56 - INFO - ------------------------------------------------------
+2025-07-15 17:56 - INFO - Number of INDs from spider: 111
+2025-07-15 17:56 - INFO - Number of INDs after prefiltering: 85
