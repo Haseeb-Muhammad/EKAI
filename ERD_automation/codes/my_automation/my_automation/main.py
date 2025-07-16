@@ -4,15 +4,6 @@ from attribute import Attribute
 from ind import IND
 import logging
 
-logging.basicConfig(
-                    filename=os.path.join(os.path.dirname(os.path.abspath(__file__)),"app.log"),
-                    encoding="utf-8",
-                    filemode="w",
-                    format="{asctime} - {levelname} - {message}",
-                    style="{",
-                    datefmt="%Y-%m-%d %H:%M",
-                    level=10
-)
 
 def load_csv_files(directory_path):
     """
@@ -154,14 +145,115 @@ def prefiltering(inds, pk_table):
 
     return pruned_inds
 
+def auto_incremental_pk_pruning(inds):
+    """
+    Prunes inclusion dependencies (INDs) that represent auto-incremental primary keys.
+
+    This function checks each IND in the input list and removes those where the dependent values
+    form a consecutive subsequence within the reference values, which is indicative of an auto-incremental
+    primary key relationship.
+
+    Parameters
+    ----------
+    inds : list
+        A list of IND objects, each containing 'dependent' and 'reference' attributes with 'values' lists.
+
+    Returns
+    -------
+    pruned_inds : list
+        A list of IND objects after removing those that represent auto-incremental primary keys.
+
+    Notes
+    -----
+    The function logs the number of INDs remaining after pruning.
+    """
+    pruned_inds = []
+    for ind in inds:
+        i =0
+        length_dependent = len(ind.dependent.values)
+        length_reference = len(ind.reference.values)
+        subset = False
+        while i <= (length_reference-length_dependent + 1):
+            if not (ind.reference.values[i:i+length_dependent] == ind.dependent.values):
+                subset = True
+            i+=1
+        if not subset:
+            pruned_inds.append(ind)
+    logging.info(f"Number of INDs after pruning auto incremental primary keys: {len(pruned_inds)}")
+    return pruned_inds
+
+def check_multi_dependence(inds):
+    """
+    Prunes a list of INDs by removing those that reference the same dependent attribute multiple times.
+
+    Parameters
+    ----------
+    inds : list
+        A list of IND objects, each with a 'dependent' attribute.
+
+    Returns
+    -------
+    list
+        A pruned list of INDs where no dependent attribute is referenced by more than one IND.
+
+    Notes
+    -----
+    This function ensures that the same dependent attribute is not referenced by multiple INDs,
+    which is useful for maintaining integrity when handling auto-incremental primary keys.
+    """
+    # Same dependent attribute cannot be referenced by multiple attributes
+    pruned_inds = []
+    for ind in inds:
+        multi_referenced = False
+        for ind1 in inds:
+            if ind!= ind1 and ind.dependent == ind1.dependent:
+                multi_referenced = True
+        if not multi_referenced:
+            pruned_inds.append(ind)
+    logging.info(f"Number of INDs after pruning auto incremental primary keys: {len(pruned_inds)}")
+    return pruned_inds
+
+
+def logINDs(inds):
+    """
+    Logs the relationships between reference and dependent objects in a list of INDs.
+
+    Parameters
+    ----------
+    inds : list
+        A list of IND objects, each containing 'reference' and 'dependent' attributes with 'fullName' properties.
+
+    """
+    logging.info("-"*50)
+    for ind in inds:
+        logging.info(f"{ind.reference.fullName}->{ind.dependent.fullName}")
+
 def main():
     CSV_DIR = "/home/haseeb/Desktop/EKAI/ERD_automation/Dataset/train/northwind-db"
     SPIDER_IND_RESULT = "/home/haseeb/Desktop/EKAI/ERD_automation/codes/inclusionDependencyWithSpider/spider_results/northwind.txt"
-    
+
+
+    db_name=os.path.basename(CSV_DIR)
+    logging.basicConfig(
+                    filename=os.path.join(os.path.dirname(os.path.abspath(__file__)),f"{db_name}.log"),
+                    encoding="utf-8",
+                    filemode="w",
+                    format="{asctime} - {levelname} - {message}",
+                    style="{",
+                    datefmt="%Y-%m-%d %H:%M",
+                    level=10
+    )
+
     attributes = load_csv_files(CSV_DIR)
     pk_table = extractPrimaryKeys(attributes=attributes)   
     inds = read_IND(SPIDER_IND_RESULT, attributes=attributes)
+    # logINDs(inds)
     prefiltered_inds = prefiltering(inds=inds, pk_table=pk_table)
+    # logINDs(prefiltered_inds)
+    pruned_inds = auto_incremental_pk_pruning(prefiltered_inds)
+    # logINDs(pruned_inds)
+    multi_dependence_filtered_inds = check_multi_dependence(pruned_inds)
+    logINDs(multi_dependence_filtered_inds)
 
 if __name__ == "__main__":
     main()
