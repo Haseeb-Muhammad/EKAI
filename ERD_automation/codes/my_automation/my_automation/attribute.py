@@ -68,6 +68,10 @@ class Attribute:
             Ratio of unique values to total values
         """
 
+        #Dealing with all null values atribute
+        if len(self.values) == 0:
+            return 0
+
         hll = HyperLogLog()
         total = 0
         
@@ -75,7 +79,7 @@ class Attribute:
             hll.update(str(value).encode('utf8'))
             total +=1
         
-        return hll.count() / total
+        return min(1, hll.count() / total)
     
     def check_suffix(self, suffix_list=["key", 'id', 'nr', 'no']):
         """
@@ -94,5 +98,4 @@ class Attribute:
         for suffix in suffix_list:
             if suffix in self.attribute_name:
                 return 1
-            else:
-                return 0
+        return 0

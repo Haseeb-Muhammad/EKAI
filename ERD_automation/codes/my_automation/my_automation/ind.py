@@ -22,14 +22,14 @@ class IND:
     def __init__(self, dependent, reference):
         self.dependent = dependent
         self.reference = reference
-        self.name_similarity = _calculate_name_similarity
+        self.name_similarity = self.calculate_name_similarity
 
-        def _calculate_name_similarity(self): 
-            """
-            Calculates the similarity between the attribute names of the dependent and reference objects using the partial ratio method from the `fuzz` library.
+    def calculate_name_similarity(self): 
+        """
+        Calculates the similarity between the attribute names of the dependent and reference objects using the partial ratio method from the `fuzz` library.
 
-            Returns:
-                float: The similarity score as a float between 0 and 1.
-            """
-            similarity = fuzz.partial_ratio(self.dependent.attribute_name, self.reference.attribute_name)
-            return similarity /100
+        Returns:
+            float: The similarity score as a float between 0 and 1.
+        """
+        similarity = fuzz.partial_ratio(self.dependent.attribute_name, self.reference.attribute_name)
+        return similarity /100
