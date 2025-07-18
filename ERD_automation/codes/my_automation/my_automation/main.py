@@ -124,10 +124,8 @@ def prefiltering(inds, pk_table):
     for ind in inds:
         #Checking if reference variable is a primary key
         is_pk = False
-        for table_name, pk in pk_table.items():
-            if pk[0].split(".")[1] == ind.reference.attribute_name:
-                is_pk=True
-                break
+        if pk_table[ind.reference.table_name][0] == ind.reference.fullName:
+            is_pk=True
 
         #Checking if either all of the dependent or reference attribute is null
         dependent_all_null = True
@@ -201,7 +199,6 @@ def check_multi_dependence(inds):
     This function ensures that the same dependent attribute is not referenced by multiple INDs,
     which is useful for maintaining integrity when handling auto-incremental primary keys.
     """
-    # Same dependent attribute cannot be referenced by multiple attributes
     pruned_inds = []
     for ind in inds:
         multi_referenced = False
@@ -210,9 +207,36 @@ def check_multi_dependence(inds):
                 multi_referenced = True
         if not multi_referenced:
             pruned_inds.append(ind)
-    logging.info(f"Number of INDs after pruning auto incremental primary keys: {len(pruned_inds)}")
+    logging.info(f"Number of INDs after pruning multi-dependencies keys: {len(pruned_inds)}")
     return pruned_inds
 
+def check_dependent_referencing(inds):
+    """
+    Removes elements from the input list whose dependent attribute references another element's reference attribute.
+    Parameters
+    ----------
+    inds : list
+        A list of objects, each expected to have 'dependent' and 'reference' attributes.
+    Returns
+    -------
+    new_inds : list
+        A list containing only those elements from `inds` whose dependent attribute does not reference any other element's reference attribute.
+    Notes
+    -----
+    The function does not modify the input list in place; instead, it returns a new list.
+    Logging is performed to indicate the number of elements after pruning.
+    """
+    new_inds = [] #Can't change the list which is being looped over
+    for ind in inds:
+        dependent_referencing=False
+        for ind1 in inds:
+            if (ind!=ind1) and (ind.dependent == ind1.reference):
+                dependent_referencing=True
+        if not dependent_referencing:
+            new_inds.append(ind)
+    logging.info(f"Number of INDs after pruning dependent variable referencing others: {len(new_inds)}")
+    
+    return new_inds
 
 def logINDs(inds):
     """
@@ -244,16 +268,14 @@ def main():
                     level=10
     )
 
+
     attributes = load_csv_files(CSV_DIR)
     pk_table = extractPrimaryKeys(attributes=attributes)   
     inds = read_IND(SPIDER_IND_RESULT, attributes=attributes)
-    # logINDs(inds)
     prefiltered_inds = prefiltering(inds=inds, pk_table=pk_table)
-    # logINDs(prefiltered_inds)
     pruned_inds = auto_incremental_pk_pruning(prefiltered_inds)
-    # logINDs(pruned_inds)
-    multi_dependence_filtered_inds = check_multi_dependence(pruned_inds)
-    logINDs(multi_dependence_filtered_inds)
+    dependent_referencing_filtered_inds = check_dependent_referencing(pruned_inds)
+    logINDs(dependent_referencing_filtered_inds)
 
 if __name__ == "__main__":
     main()
