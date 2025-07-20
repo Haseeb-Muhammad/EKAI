@@ -252,10 +252,79 @@ def logINDs(inds):
     for ind in inds:
         logging.info(f"{ind.reference.fullName}->{ind.dependent.fullName}")
 
+def evaluate(gt_path, inds):
+    """
+    Evaluates predicted relationships against ground truth data.
+    Parameters
+    ----------
+    gt_path : str
+        Path to the ground truth file. Each line in the file should be in the format 'reference=dependent'.
+    inds : list
+        List of predicted relationship objects. Each object must have 'reference.fullName' and 'dependent.fullName' attributes.
+    Returns
+    -------
+    results : dict
+        Dictionary containing lists of True Positives ('TP'), False Positives ('FP'), and False Negatives ('FN').
+        - 'TP': List of correctly predicted relationships (format: 'reference=dependent').
+        - 'FP': List of predicted relationships not found in ground truth.
+        - 'FN': List of ground truth relationships not found in predictions.
+    Notes
+    -----
+    The function also logs detailed evaluation results using the logging module.
+    """
+    results = {
+                "TP" : [],
+                "FP" : [],
+                "FN" : []
+            }
+    with open(gt_path, "r") as f:
+        for line in f:
+            ind_split = line.split("=")
+            dependent = ind_split[1].strip()
+            reference = ind_split[0].strip()
+            
+            found = False
+            ind_remove_index = 0
+            for i, ind in enumerate(inds):
+                if ind.reference.fullName == reference and ind.dependent.fullName == dependent:
+                    results["TP"].append(f"{reference}={dependent}")
+                    found = True
+                    ind_remove_index = i
+                    break
+
+            if not found:
+                results["FN"].append(f"{reference}={dependent}")
+            else: #remove from inds to calculate False positives
+                del inds[ind_remove_index]
+
+    for ind in inds:
+        results["FP"].append(f"{ind.reference.fullName}={ind.dependent.fullName}")
+    
+    logging.info(f"{"-"*50} Results {"-"*50}")
+    logging.info("TP")
+    for tp in results["TP"]:
+        logging.info(tp)
+    logging.info("FP")
+    for fp in results["FP"]:
+        logging.info(fp)
+    logging.info("FN")
+    for fn in results["FN"]:
+        logging.info(fn)
+    logging.info(f"{"-"*50} Evaluations {"-"*50}")
+    logging.info(f"True Positive: {len(results["TP"])}")
+    logging.info(f"False Positive: {len(results["FP"])}")
+    logging.info(f"False Negative: {len(results["FN"])}")
+
+    return results
+
+
+def calculating_cosine_similarity(ind):
+    pass
+
 def main():
     CSV_DIR = "/home/haseeb/Desktop/EKAI/ERD_automation/Dataset/train/northwind-db"
     SPIDER_IND_RESULT = "/home/haseeb/Desktop/EKAI/ERD_automation/codes/inclusionDependencyWithSpider/spider_results/northwind.txt"
-
+    GT_PATH = "/home/haseeb/Desktop/EKAI/ERD_automation/Dataset/ground_truth/northwind-db.txt"
 
     db_name=os.path.basename(CSV_DIR)
     logging.basicConfig(
@@ -276,6 +345,7 @@ def main():
     pruned_inds = auto_incremental_pk_pruning(prefiltered_inds)
     dependent_referencing_filtered_inds = check_dependent_referencing(pruned_inds)
     logINDs(dependent_referencing_filtered_inds)
+    evaluate(GT_PATH, dependent_referencing_filtered_inds)
 
 if __name__ == "__main__":
     main()
