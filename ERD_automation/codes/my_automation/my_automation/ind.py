@@ -23,6 +23,7 @@ class IND:
         self.dependent = dependent
         self.reference = reference
         self.name_similarity = self.calculate_name_similarity
+        self.candidate_confirmation = False
 
     def calculate_name_similarity(self): 
         """
@@ -31,5 +32,10 @@ class IND:
         Returns:
             float: The similarity score as a float between 0 and 1.
         """
-        similarity = fuzz.partial_ratio(self.dependent.attribute_name, self.reference.attribute_name)
+        similarity = fuzz.partial_ratio(self.dependent.attribute_name, self.reference.attribute_name) / 100
+        if similarity > 80:
+            self.candidate_confirmation == True
+        else:
+            pass
+
         return similarity /100

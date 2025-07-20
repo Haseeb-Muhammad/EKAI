@@ -3,7 +3,7 @@ import pandas as pd
 from attribute import Attribute
 from ind import IND
 import logging
-
+import os 
 
 def load_csv_files(directory_path):
     """
@@ -318,9 +318,6 @@ def evaluate(gt_path, inds):
     return results
 
 
-def calculating_cosine_similarity(ind):
-    pass
-
 def main():
     CSV_DIR = "/home/haseeb/Desktop/EKAI/ERD_automation/Dataset/train/northwind-db"
     SPIDER_IND_RESULT = "/home/haseeb/Desktop/EKAI/ERD_automation/codes/inclusionDependencyWithSpider/spider_results/northwind.txt"
@@ -328,7 +325,7 @@ def main():
 
     db_name=os.path.basename(CSV_DIR)
     logging.basicConfig(
-                    filename=os.path.join(os.path.dirname(os.path.abspath(__file__)),f"{db_name}.log"),
+                    filename=os.path.join(os.path.dirname(os.path.abspath(__file__)),"logs",f"{db_name}.log"),
                     encoding="utf-8",
                     filemode="w",
                     format="{asctime} - {levelname} - {message}",

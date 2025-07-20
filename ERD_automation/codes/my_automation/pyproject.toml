@@ -11,6 +11,7 @@ pandas = "^2.3.1"
 datasketch = "^1.6.5"
 fuzzywuzzy = "^0.18.0"
 python-levenshtein = "^0.27.1"
+openai = "^1.97.0"
 
 
 [build-system]
