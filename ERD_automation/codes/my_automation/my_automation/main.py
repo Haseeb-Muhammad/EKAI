@@ -68,10 +68,12 @@ def extractPrimaryKeys(attributes):
         current_pk = pk_table.get(table_name)
         if not current_pk or current_pk[1] < value.pkScore:
             pk_table[table_name] = (value.fullName, value.pkScore)
-    logging.info("--------------------------Tables and their Primary Keys----------------------------")
+
+    logging.info(f"{"-"*50}Tables and their Primary Keys{"-"*50}")
     for key, value in pk_table.items():
         logging.info(f"{key} : {value[0]}")
-    logging.info("------------------------------------------------------")
+    logging.info("-"*50)
+    
     return pk_table
 
 def read_IND(file_path, attributes):
@@ -90,7 +92,7 @@ def read_IND(file_path, attributes):
         
     Notes
     -----
-    File format should be one dependency per line as: dependent=reference
+    File format should be one dependency per line as: reference=dependent
     """
     inds = []
     logging.info("Reading INDs from SPIDER")
@@ -98,9 +100,9 @@ def read_IND(file_path, attributes):
     with open(file_path, "r") as f:
         for line in f:
             vars = line.strip().split("=")
-            inds.append(IND(dependent=attributes[vars[0]], reference=attributes[vars[1]]))
+            inds.append(IND(dependent=attributes[vars[1]], reference=attributes[vars[0]]))
     logging.info(f"Number of INDs from spider: {len(inds)}")
-    return inds
+    return inds, len(inds)
 
 def prefiltering(inds, pk_table):
     """
@@ -255,7 +257,7 @@ def logINDs(inds):
     for ind in inds:
         logging.info(f"{ind.reference.fullName}->{ind.dependent.fullName}")
 
-def evaluate(gt_path, inds):
+def evaluate(gt_path, inds, total_inds):
     """
     Evaluates predicted relationships against ground truth data.
     Parameters
@@ -278,7 +280,8 @@ def evaluate(gt_path, inds):
     results = {
                 "TP" : [],
                 "FP" : [],
-                "FN" : []
+                "FN" : [],
+                "TN" : []
             }
     
     #Convert predictions to set for O(1) look up
@@ -297,6 +300,7 @@ def evaluate(gt_path, inds):
                 pred_set.remove(gt_key)
             else:
                 results["FN"].append(gt_key)
+                print(f"Added {gt_key} to FN")
 
     results["FP"] = list(pred_set)
 
@@ -315,9 +319,21 @@ def evaluate(gt_path, inds):
     logging.info(f"False Positive: {len(results["FP"])}")
     logging.info(f"False Negative: {len(results["FN"])}")
 
+    results["TN"] = total_inds - len(results["TP"]) - len(results["FP"]) - len(results["FN"])
+    logging.info(f"True Negative: {results["TN"]}")
+
     return results
 
-
+def include_specialINDs(Allinds, filtered_inds):
+    final_inds = []
+    for ind in Allinds: 
+        if ind.candidate_confirmation:
+            if ind not in filtered_inds:
+                final_inds.append(ind)
+                print(f"Through Special priority {ind.reference.fullName}={ind.dependent.fullName}")
+    final_inds = final_inds + filtered_inds
+    return final_inds
+                
 def main():
 
     CSV_DIR = "/home/haseeb/Desktop/EKAI/ERD_automation/Dataset/train/northwind-db"
@@ -335,30 +351,22 @@ def main():
                     datefmt="%Y-%m-%d %H:%M",
                     level=logging.INFO
     )
-    final_inds = []
     attributes = load_csv_files(CSV_DIR)
     pk_table = extractPrimaryKeys(attributes=attributes)   
 
-    inds = read_IND(SPIDER_IND_RESULT, attributes=attributes)
+    inds, total_inds = read_IND(SPIDER_IND_RESULT, attributes=attributes)
     prefiltered_inds = prefiltering(inds=inds, pk_table=pk_table)
+    pruned_inds = auto_incremental_pk_pruning(prefiltered_inds)
+    dependent_referencing_filtered_inds = check_dependent_referencing(pruned_inds)
+    final_inds = include_specialINDs(inds, dependent_referencing_filtered_inds)
 
-    # pruned_inds = auto_incremental_pk_pruning(prefiltered_inds)
-    # dependent_referencing_filtered_inds = check_dependent_referencing(pruned_inds)
     # both_name_and_pruned = 0
     # special_priority = 0
-    # for ind in inds: 
-    #     if ind.candidate_confirmation:
-    #         print("Candidate confirmed")
-    #         if ind not in dependent_referencing_filtered_inds:
-    #             final_inds.append(ind)
-    #             both_name_and_pruned+=1
-    #         else:
-    #             special_priority +=1
     # logging.info(f"{both_name_and_pruned=}")
     # logging.info(f"{special_priority=}")
     # final_inds = final_inds + dependent_referencing_filtered_inds
-    logINDs(prefiltered_inds)
-    evaluate(GT_PATH, prefiltered_inds)
+    logINDs(final_inds)
+    evaluate(GT_PATH, final_inds, total_inds)
 
 if __name__ == "__main__":
     main()

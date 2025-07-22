@@ -203,7 +203,7 @@ def find_inclusion_dependencies(directory_path, output_file="inclusion_dependenc
 # Example usage
 if __name__ == "__main__":
     # Example usage - replace with your directory path
-    directory_path = "/home/haseeb/Desktop/EKAI/ERD_automation/Dataset/train/sakila-db"
-    output_file = "/home/haseeb/Desktop/EKAI/ERD_automation/codes/inclusionDependencyWithSpider/spider_results/sakila.txt"
+    directory_path = "/home/haseeb/Desktop/EKAI/ERD_automation/Dataset/train/northwind-db"
+    output_file = "/home/haseeb/Desktop/EKAI/ERD_automation/codes/inclusionDependencyWithSpider/spider_results/northwind.txt"
 find_inclusion_dependencies(directory_path, output_file)
 
