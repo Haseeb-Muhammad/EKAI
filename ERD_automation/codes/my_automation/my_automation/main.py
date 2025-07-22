@@ -259,23 +259,26 @@ def logINDs(inds):
 
 def evaluate(gt_path, inds, total_inds):
     """
-    Evaluates predicted relationships against ground truth data.
+    Evaluates prediction results against ground truth data.
     Parameters
     ----------
     gt_path : str
-        Path to the ground truth file. Each line in the file should be in the format 'reference=dependent'.
+        Path to the ground truth file. Each line in the file should contain a key in the format 'reference=dependent'.
     inds : list
-        List of predicted relationship objects. Each object must have 'reference.fullName' and 'dependent.fullName' attributes.
+        List of prediction objects. Each object should have 'reference.fullName' and 'dependent.fullName' attributes.
+    total_inds : int
+        Total number of possible prediction pairs (used to compute True Negatives).
     Returns
     -------
-    results : dict
-        Dictionary containing lists of True Positives ('TP'), False Positives ('FP'), and False Negatives ('FN').
-        - 'TP': List of correctly predicted relationships (format: 'reference=dependent').
-        - 'FP': List of predicted relationships not found in ground truth.
-        - 'FN': List of ground truth relationships not found in predictions.
+    dict
+        Dictionary containing evaluation results with the following keys:
+            - 'TP': list of true positive keys (predicted and present in ground truth)
+            - 'FP': list of false positive keys (predicted but not in ground truth)
+            - 'FN': list of false negative keys (not predicted but present in ground truth)
+            - 'TN': int, number of true negatives (not predicted and not in ground truth)
     Notes
     -----
-    The function also logs detailed evaluation results using the logging module.
+    Logs detailed evaluation results using the logging module.
     """
     results = {
                 "TP" : [],
@@ -325,6 +328,29 @@ def evaluate(gt_path, inds, total_inds):
     return results
 
 def include_specialINDs(Allinds, filtered_inds):
+    """
+    Include special individuals based on candidate confirmation and merge with filtered individuals.
+
+    This function iterates over all individuals and checks if each individual has a `candidate_confirmation` attribute set to True.
+    If so, and if the individual is not already present in the `filtered_inds` list, the individual is added to the final list.
+    After processing, all individuals from `filtered_inds` are appended to the result.
+
+    Parameters
+    ----------
+    Allinds : list
+        List of all individual objects to be considered.
+    filtered_inds : list
+        List of filtered individual objects.
+
+    Returns
+    -------
+    final_inds : list
+        Combined list of individuals including those with special priority and the filtered individuals.
+
+    Notes
+    -----
+    Prints a message for each individual added through special priority, displaying their reference and dependent full names.
+    """
     final_inds = []
     for ind in Allinds: 
         if ind.candidate_confirmation:
@@ -359,12 +385,6 @@ def main():
     pruned_inds = auto_incremental_pk_pruning(prefiltered_inds)
     dependent_referencing_filtered_inds = check_dependent_referencing(pruned_inds)
     final_inds = include_specialINDs(inds, dependent_referencing_filtered_inds)
-
-    # both_name_and_pruned = 0
-    # special_priority = 0
-    # logging.info(f"{both_name_and_pruned=}")
-    # logging.info(f"{special_priority=}")
-    # final_inds = final_inds + dependent_referencing_filtered_inds
     logINDs(final_inds)
     evaluate(GT_PATH, final_inds, total_inds)
 
