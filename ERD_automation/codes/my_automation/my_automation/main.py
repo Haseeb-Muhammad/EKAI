@@ -2,8 +2,8 @@ import os
 import pandas as pd
 from attribute import Attribute
 from ind import IND
+import openai
 import logging
-import os 
 
 def load_csv_files(directory_path):
     """
@@ -93,10 +93,12 @@ def read_IND(file_path, attributes):
     File format should be one dependency per line as: dependent=reference
     """
     inds = []
+    logging.info("Reading INDs from SPIDER")
+    logging.info("-"*50)
     with open(file_path, "r") as f:
         for line in f:
             vars = line.strip().split("=")
-            inds.append(IND(attributes[vars[0]], attributes[vars[1]]))
+            inds.append(IND(dependent=attributes[vars[0]], reference=attributes[vars[1]]))
     logging.info(f"Number of INDs from spider: {len(inds)}")
     return inds
 
@@ -125,6 +127,7 @@ def prefiltering(inds, pk_table):
         #Checking if reference variable is a primary key
         is_pk = False
         if pk_table[ind.reference.table_name][0] == ind.reference.fullName:
+            logging.info(f"is primary key so not prefiltered {ind.reference.fullName}")
             is_pk=True
 
         #Checking if either all of the dependent or reference attribute is null
@@ -277,29 +280,26 @@ def evaluate(gt_path, inds):
                 "FP" : [],
                 "FN" : []
             }
-    with open(gt_path, "r") as f:
-        for line in f:
-            ind_split = line.split("=")
-            dependent = ind_split[1].strip()
-            reference = ind_split[0].strip()
-            
-            found = False
-            ind_remove_index = 0
-            for i, ind in enumerate(inds):
-                if ind.reference.fullName == reference and ind.dependent.fullName == dependent:
-                    results["TP"].append(f"{reference}={dependent}")
-                    found = True
-                    ind_remove_index = i
-                    break
-
-            if not found:
-                results["FN"].append(f"{reference}={dependent}")
-            else: #remove from inds to calculate False positives
-                del inds[ind_remove_index]
-
-    for ind in inds:
-        results["FP"].append(f"{ind.reference.fullName}={ind.dependent.fullName}")
     
+    #Convert predictions to set for O(1) look up
+    pred_set = set()
+    pred_dict = {}
+    for ind in inds:
+        key = f"{ind.reference.fullName}={ind.dependent.fullName}"
+        pred_set.add(key)
+        pred_dict[key] = ind
+
+    with open(gt_path, "r") as f:
+        for gt_key in f:
+            gt_key = gt_key.strip()
+            if gt_key in pred_set:
+                results["TP"].append(gt_key)
+                pred_set.remove(gt_key)
+            else:
+                results["FN"].append(gt_key)
+
+    results["FP"] = list(pred_set)
+
     logging.info(f"{"-"*50} Results {"-"*50}")
     logging.info("TP")
     for tp in results["TP"]:
@@ -319,9 +319,11 @@ def evaluate(gt_path, inds):
 
 
 def main():
+
     CSV_DIR = "/home/haseeb/Desktop/EKAI/ERD_automation/Dataset/train/northwind-db"
     SPIDER_IND_RESULT = "/home/haseeb/Desktop/EKAI/ERD_automation/codes/inclusionDependencyWithSpider/spider_results/northwind.txt"
     GT_PATH = "/home/haseeb/Desktop/EKAI/ERD_automation/Dataset/ground_truth/northwind-db.txt"
+    openai.api_key = os.getenv("OPENAI_API_KEY")
 
     db_name=os.path.basename(CSV_DIR)
     logging.basicConfig(
@@ -331,18 +333,32 @@ def main():
                     format="{asctime} - {levelname} - {message}",
                     style="{",
                     datefmt="%Y-%m-%d %H:%M",
-                    level=10
+                    level=logging.INFO
     )
-
-
+    final_inds = []
     attributes = load_csv_files(CSV_DIR)
     pk_table = extractPrimaryKeys(attributes=attributes)   
+
     inds = read_IND(SPIDER_IND_RESULT, attributes=attributes)
     prefiltered_inds = prefiltering(inds=inds, pk_table=pk_table)
-    pruned_inds = auto_incremental_pk_pruning(prefiltered_inds)
-    dependent_referencing_filtered_inds = check_dependent_referencing(pruned_inds)
-    logINDs(dependent_referencing_filtered_inds)
-    evaluate(GT_PATH, dependent_referencing_filtered_inds)
+
+    # pruned_inds = auto_incremental_pk_pruning(prefiltered_inds)
+    # dependent_referencing_filtered_inds = check_dependent_referencing(pruned_inds)
+    # both_name_and_pruned = 0
+    # special_priority = 0
+    # for ind in inds: 
+    #     if ind.candidate_confirmation:
+    #         print("Candidate confirmed")
+    #         if ind not in dependent_referencing_filtered_inds:
+    #             final_inds.append(ind)
+    #             both_name_and_pruned+=1
+    #         else:
+    #             special_priority +=1
+    # logging.info(f"{both_name_and_pruned=}")
+    # logging.info(f"{special_priority=}")
+    # final_inds = final_inds + dependent_referencing_filtered_inds
+    logINDs(prefiltered_inds)
+    evaluate(GT_PATH, prefiltered_inds)
 
 if __name__ == "__main__":
     main()
