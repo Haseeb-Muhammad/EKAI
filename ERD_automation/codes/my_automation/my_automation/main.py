@@ -2,8 +2,9 @@ import os
 import pandas as pd
 from attribute import Attribute
 from ind import IND
-import openai
 import logging
+
+import json
 
 def load_csv_files(directory_path):
     """
@@ -257,55 +258,36 @@ def logINDs(inds):
     for ind in inds:
         logging.info(f"{ind.reference.fullName}->{ind.dependent.fullName}")
 
-def evaluate(gt_path, inds, total_inds):
-    """
-    Evaluates prediction results against ground truth data.
-    Parameters
-    ----------
-    gt_path : str
-        Path to the ground truth file. Each line in the file should contain a key in the format 'reference=dependent'.
-    inds : list
-        List of prediction objects. Each object should have 'reference.fullName' and 'dependent.fullName' attributes.
-    total_inds : int
-        Total number of possible prediction pairs (used to compute True Negatives).
-    Returns
-    -------
-    dict
-        Dictionary containing evaluation results with the following keys:
-            - 'TP': list of true positive keys (predicted and present in ground truth)
-            - 'FP': list of false positive keys (predicted but not in ground truth)
-            - 'FN': list of false negative keys (not predicted but present in ground truth)
-            - 'TN': int, number of true negatives (not predicted and not in ground truth)
-    Notes
-    -----
-    Logs detailed evaluation results using the logging module.
-    """
-    results = {
-                "TP" : [],
-                "FP" : [],
-                "FN" : [],
-                "TN" : []
-            }
-    
-    #Convert predictions to set for O(1) look up
-    pred_set = set()
-    pred_dict = {}
-    for ind in inds:
-        key = f"{ind.reference.fullName}={ind.dependent.fullName}"
-        pred_set.add(key)
-        pred_dict[key] = ind
 
-    with open(gt_path, "r") as f:
-        for gt_key in f:
-            gt_key = gt_key.strip()
-            if gt_key in pred_set:
-                results["TP"].append(gt_key)
-                pred_set.remove(gt_key)
+def evaluate(gt_path, inds):
+    with open(gt_path) as file_data:
+        json_data = json.load(file_data)
+        relations = json_data["relations"]
+
+        results = {
+                        "TP" : [],
+                        "FP" : [],
+                        "FN" : [],
+                    }
+            
+        #Convert predictions to set for O(1) look up
+        pred_set = set()
+        pred_dict = {} 
+        for ind in inds:
+            key = f"{ind.reference.fullName}={ind.dependent.fullName}"
+            pred_set.add(key)
+            pred_dict[key] = ind
+
+        for gt_key in relations:
+            relation_name = f"{gt_key["primary_key_table_column"]}={gt_key["foreign_key_table_column"]}"
+            if relation_name in pred_set:
+                results["TP"].append(relation_name)
+                pred_set.remove(relation_name)
             else:
-                results["FN"].append(gt_key)
-                print(f"Added {gt_key} to FN")
+                results["FN"].append(relation_name)
 
-    results["FP"] = list(pred_set)
+        results["FP"] = list(pred_set)
+
 
     logging.info(f"{"-"*50} Results {"-"*50}")
     logging.info("TP")
@@ -322,10 +304,8 @@ def evaluate(gt_path, inds, total_inds):
     logging.info(f"False Positive: {len(results["FP"])}")
     logging.info(f"False Negative: {len(results["FN"])}")
 
-    results["TN"] = total_inds - len(results["TP"]) - len(results["FP"]) - len(results["FN"])
-    logging.info(f"True Negative: {results["TN"]}")
-
     return results
+
 
 def include_specialINDs(Allinds, filtered_inds):
     """
@@ -362,10 +342,10 @@ def include_specialINDs(Allinds, filtered_inds):
                 
 def main():
 
-    CSV_DIR = "/home/haseeb/Desktop/EKAI/ERD_automation/Dataset/train/northwind-db"
+    CSV_DIR = "/home/haseeb/Desktop/EKAI/ERD_automation/Dataset/train/northwind"
     SPIDER_IND_RESULT = "/home/haseeb/Desktop/EKAI/ERD_automation/codes/inclusionDependencyWithSpider/spider_results/northwind.txt"
-    GT_PATH = "/home/haseeb/Desktop/EKAI/ERD_automation/Dataset/ground_truth/northwind-db.txt"
-    openai.api_key = os.getenv("OPENAI_API_KEY")
+    GT_PATH = "/home/haseeb/Desktop/EKAI/ERD_automation/Dataset/ground_truth/northwind.json"
+    # openai.api_key = os.getenv("OPENAI_API_KEY")
 
     db_name=os.path.basename(CSV_DIR)
     logging.basicConfig(
@@ -380,13 +360,15 @@ def main():
     attributes = load_csv_files(CSV_DIR)
     pk_table = extractPrimaryKeys(attributes=attributes)   
 
-    inds, total_inds = read_IND(SPIDER_IND_RESULT, attributes=attributes)
+    inds = read_IND(SPIDER_IND_RESULT, attributes=attributes)
     prefiltered_inds = prefiltering(inds=inds, pk_table=pk_table)
     pruned_inds = auto_incremental_pk_pruning(prefiltered_inds)
     dependent_referencing_filtered_inds = check_dependent_referencing(pruned_inds)
     final_inds = include_specialINDs(inds, dependent_referencing_filtered_inds)
     logINDs(final_inds)
-    evaluate(GT_PATH, final_inds, total_inds)
+    evaluate(GT_PATH, final_inds)
+
+
 
 if __name__ == "__main__":
     main()

@@ -1,11 +1,11 @@
 from fuzzywuzzy import fuzz
 import os
 import numpy as np
-from openai import OpenAI
+# from openai import OpenAI
 import logging
 from sentence_transformers import SentenceTransformer, util
 
-client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
+# client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
 
 class IND:
     """
@@ -56,7 +56,7 @@ class IND:
         Returns:
             float: The similarity score as a float between 0 and 1.
         """
-        similarity = fuzz.partial_ratio(self.dependent.attribute_name, self.reference.attribute_name) / 100
+        similarity = fuzz.partial_ratio(self.dependent.fullName, self.reference.fullName) / 100
         if similarity > 0.8:
             self.candidate_confirmation = True
             logging.info(f"{self.reference.fullName}->{self.dependent.fullName} : partial_ratio score={similarity}")
